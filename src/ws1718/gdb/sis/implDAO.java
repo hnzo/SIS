@@ -138,7 +138,7 @@ class implDAO implements DataAccessObject {
 
     @Override
     public void addStudent(String string, String string1, String string2, String string3, String string4) throws ApplicationException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //Hier kommt das neue Feature hin.
     }
 
     @Override
