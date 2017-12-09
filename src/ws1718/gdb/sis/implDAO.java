@@ -7,6 +7,7 @@ import edu.whs.gdb.entity.Praktikumsteilnahme;
 import edu.whs.gdb.entity.Student;
 import edu.whs.gdb.entity.Studienrichtung;
 import ws1718.gdb.sis.entity.eModul;
+import ws1718.gdb.sis.entity.eStudent;
 import ws1718.gdb.sis.entity.eStudienrichtung;
 import java.sql.*;
 import java.util.ArrayList;
@@ -138,7 +139,9 @@ class implDAO implements DataAccessObject {
 
     @Override
     public void addStudent(String string, String string1, String string2, String string3, String string4) throws ApplicationException {
-        //Hier kommt das neue Feature hin.
+        Student stud = new eStudent(string, string1, string2, string3, string4);
+
+//        System.out.println("string: " + string + "\nstring1: " + string1 + "\nstring2: " + string2 + "\nstring3: " + string3 + "\nstring4: " + string4);
     }
 
     @Override
