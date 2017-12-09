@@ -190,7 +190,6 @@ class implDAO implements DataAccessObject {
                 alleModule.add(new eModul(rs.getString(1), rs.getString(2), rs.getInt(3),
                         rs.getInt(4), rs.getInt(5), rs.getInt(6)));
             }
-
             con.commit();
         } catch (SQLException e) {
             System.out.println("Die Module konnten nicht geladen werden");
