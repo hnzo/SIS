@@ -7,8 +7,10 @@ import edu.whs.gdb.entity.Praktikumsteilnahme;
 import edu.whs.gdb.entity.Student;
 import edu.whs.gdb.entity.Studienrichtung;
 import ws1718.gdb.sis.entity.eModul;
+import ws1718.gdb.sis.entity.ePraktikumsteilnahme;
 import ws1718.gdb.sis.entity.eStudent;
 import ws1718.gdb.sis.entity.eStudienrichtung;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -141,9 +143,9 @@ class implDAO implements DataAccessObject {
     public void addStudent(String matrikelNr, String name, String vorname, String adresse, String skuerzel) throws ApplicationException {
 
         eStudent stud = new eStudent(matrikelNr, name, vorname, adresse, skuerzel);
-        try{
+        try {
             PreparedStatement ps = con.prepareStatement("INSERT INTO APP.STUDENT(MATRIKEL, NAME, VORNAME, ADRESSE, SKUERZEL)" +
-                    " values (?, ?, ?, ?, ?)");
+                    " VALUES (?, ?, ?, ?, ?)");
             ps.setString(1, stud.getMatrikel());
             ps.setString(2, stud.getName());
             ps.setString(3, stud.getVorname());
@@ -160,11 +162,25 @@ class implDAO implements DataAccessObject {
         }
     }
 
-    //TODO
     @Override
     public Collection<Student> getAllStudent() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Collection<Student> students = new ArrayList<>();
+
+        try {
+            rs = stmt.executeQuery("SELECT * FROM APP.STUDENT");
+
+            while (rs.next()) {
+                students.add(new eStudent(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5)));
+            }
+            con.commit();
+        } catch (SQLException e) {
+            System.err.println("Die Studenten konnten nicht ausgegeben werden.");
+            e.printStackTrace();
+            rollback();
+        }
+        return students;
     }
+
     //TODO
     @Override
     public boolean enroll(String string, String string1, String string2, String string3, String string4, Modul modul, String string5) throws ApplicationException {
@@ -222,7 +238,26 @@ class implDAO implements DataAccessObject {
 
     @Override
     public Collection<Praktikumsteilnahme> getAllPraktikumsteilnahme(Modul modul, String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Collection<Praktikumsteilnahme> praktika = new ArrayList<>();
+
+        try {
+            rs = stmt.executeQuery("SELECT * FROM APP.PRAKTIKUMSTEILNAHME");
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM APP.STUDENT WHERE MATRIKEL=?");
+            while (rs.next()) {
+                String matrikelNr = rs.getString(1);
+                String modulKuerzel = rs.getString(2);
+                String sem = rs.getString(3);
+                Boolean testat = rs.getBoolean(4);
+                ps.setString(1, rs.getString(1));
+//                praktika.add(new ePraktikumsteilnahme());
+            }
+            con.commit();
+        } catch (SQLException e) {
+            System.err.println("Die Praktikumsteilnahme-Liste konnte nicht geladen werden.");
+            e.printStackTrace();
+            rollback();
+        }
+        return praktika;
     }
 
     @Override

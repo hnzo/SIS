@@ -20,6 +20,13 @@ public class ePraktikumsteilnahme implements Praktikumsteilnahme {
     private String semester;
     private boolean testat;
 
+    public ePraktikumsteilnahme(eStudent student, eModul modul, String semester, boolean testat) {
+        this.student = student;
+        this.modul = modul;
+        this.semester = semester;
+        this.testat = testat;
+    }
+
     @Override
     public Student getStudent() {
         return student;
