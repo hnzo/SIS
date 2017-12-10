@@ -19,7 +19,14 @@ public class eStudent implements Student{
     private String vorname;
     private String adresse;
     private String studienrichtung;
-       
+
+    public eStudent(String matrikelNr, String name, String vorname, String adresse, String studienrichtung) {
+        this.matrikelNr = matrikelNr;
+        this.name = name;
+        this.vorname = vorname;
+        this.adresse = adresse;
+        this.studienrichtung = studienrichtung;
+    }
     
     @Override
     public String getMatrikel() {
@@ -44,6 +51,26 @@ public class eStudent implements Student{
     @Override
     public String getStudienrichtungKuerzel() {
         return studienrichtung;
+    }
+
+    public void setStudienrichtung(String studienrichtung) {
+        this.studienrichtung = studienrichtung;
+    }
+
+    public void setMatrikelNr(String matrikelNr) {
+        this.matrikelNr = matrikelNr;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setVorname(String vorname) {
+        this.vorname = vorname;
+    }
+
+    public void setAdresse(String adresse) {
+        this.adresse = adresse;
     }
 
     @Override
