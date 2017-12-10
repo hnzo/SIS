@@ -42,7 +42,7 @@ class implDAO implements DataAccessObject {
                 System.out.println("Transaction being rolled back.");
                 con.rollback();
                 System.out.println("Connection terminated.");
-                con.close();
+
 
             } catch (SQLException exc) {
                 System.err.println("SQL Exception occured: " + exc.getMessage());
@@ -138,17 +138,34 @@ class implDAO implements DataAccessObject {
     }
 
     @Override
-    public void addStudent(String string, String string1, String string2, String string3, String string4) throws ApplicationException {
-        Student stud = new eStudent(string, string1, string2, string3, string4);
+    public void addStudent(String matrikelNr, String name, String vorname, String adresse, String skuerzel) throws ApplicationException {
 
-//        System.out.println("string: " + string + "\nstring1: " + string1 + "\nstring2: " + string2 + "\nstring3: " + string3 + "\nstring4: " + string4);
+        eStudent stud = new eStudent(matrikelNr, name, vorname, adresse, skuerzel);
+        try{
+            PreparedStatement ps = con.prepareStatement("INSERT INTO APP.STUDENT(MATRIKEL, NAME, VORNAME, ADRESSE, SKUERZEL)" +
+                    " values (?, ?, ?, ?, ?)");
+            ps.setString(1, stud.getMatrikel());
+            ps.setString(2, stud.getName());
+            ps.setString(3, stud.getVorname());
+            ps.setString(4, stud.getAdresse());
+            ps.setString(5, stud.getStudienrichtungKuerzel());
+            ps.executeUpdate();
+            con.commit();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new ApplicationException("Diese Matrikelnummer ist schon vergeben.");
+        } catch (SQLException e) {
+            System.err.println("Student konnte nicht hinzugefügt werden.");
+            e.printStackTrace();
+            rollback();
+        }
     }
 
+    //TODO
     @Override
     public Collection<Student> getAllStudent() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    //TODO
     @Override
     public boolean enroll(String string, String string1, String string2, String string3, String string4, Modul modul, String string5) throws ApplicationException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -210,7 +227,12 @@ class implDAO implements DataAccessObject {
 
     @Override
     public void close() throws ApplicationException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            con.close();
+        } catch (SQLException e) {
+            System.err.println("Die DB-Verbindung konnte nicht geschlossen werden.");
+            e.printStackTrace();
+        }
     }
 
 }
