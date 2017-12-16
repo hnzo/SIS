@@ -1,15 +1,16 @@
 package ws1718.gdb.sis;
 
-import edu.whs.gdb.ApplicationException;
-import edu.whs.gdb.DataAccessObject;
-import edu.whs.gdb.entity.Modul;
-import edu.whs.gdb.entity.Praktikumsteilnahme;
-import edu.whs.gdb.entity.Student;
-import edu.whs.gdb.entity.Studienrichtung;
+import edu.whs.dba.ApplicationException;
+import edu.whs.dba.DataAccessObject;
+import edu.whs.dba.entity.Modul;
+import edu.whs.dba.entity.Praktikumsteilnahme;
+import edu.whs.dba.entity.Student;
+import edu.whs.dba.entity.Studienrichtung;
 import ws1718.gdb.sis.entity.eModul;
 import ws1718.gdb.sis.entity.ePraktikumsteilnahme;
 import ws1718.gdb.sis.entity.eStudent;
 import ws1718.gdb.sis.entity.eStudienrichtung;
+
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -148,10 +149,11 @@ class implDAO implements DataAccessObject {
         return verlaufsplan;
     }
 
-    @Override
-    public void addStudent(String matrikelNr, String name, String vorname, String adresse, String skuerzel) throws ApplicationException {
 
-        eStudent stud = new eStudent(matrikelNr, name, vorname, adresse, skuerzel);
+    @Override
+    public void addStudent(String matrikelNr, String name, String vorname, String adresse, Studienrichtung studienrichtung) throws ApplicationException {
+
+        eStudent stud = new eStudent(matrikelNr, name, vorname, adresse, studienrichtung);
         try {
             PreparedStatement ps = con.prepareStatement("INSERT INTO APP.STUDENT(MATRIKEL, NAME, VORNAME, ADRESSE, SKUERZEL)" +
                     " VALUES (?, ?, ?, ?, ?)");
@@ -159,7 +161,7 @@ class implDAO implements DataAccessObject {
             ps.setString(2, stud.getName());
             ps.setString(3, stud.getVorname());
             ps.setString(4, stud.getAdresse());
-            ps.setString(5, stud.getStudienrichtungKuerzel());
+            ps.setString(5, stud.getStudienrichtung().getKuerzel());
             ps.executeUpdate();
             con.commit();
             ps.close();
@@ -190,10 +192,10 @@ class implDAO implements DataAccessObject {
 
         try {
             stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM APP.STUDENT");
+            rs = stmt.executeQuery("SELECT * FROM APP.STUDENT, APP.STUDIENRICHTUNG WHERE STUDENT.SKUERZEL = STUDIENRICHTUNG.SKUERZEL");
 
             while (rs.next()) {
-                students.add(new eStudent(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5)));
+                students.add(new eStudent(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), new eStudienrichtung(rs.getString(5), rs.getString(7))));
             }
             con.commit();
         } catch (SQLException e) {
@@ -216,8 +218,9 @@ class implDAO implements DataAccessObject {
         return students;
     }
 
+
     @Override
-    public boolean enroll(String matrikelnr, String name, String vorname, String adresse, String skuerzel, Modul modul, String semester) throws ApplicationException {
+    public boolean enroll(String matrikelnr, String name, String vorname, String adresse, Studienrichtung skuerzel, Modul modul, String semester) throws ApplicationException {
         boolean erg = true;
 
         String modulTest = "SELECT MKUERZEL FROM APP.VERLAUFSPLAN WHERE SKUERZEL = ? AND MKUERZEL = ?";
@@ -234,7 +237,7 @@ class implDAO implements DataAccessObject {
                 System.out.println("Student vorhanden");
             }
             PreparedStatement ps = con.prepareStatement(modulTest);
-            ps.setString(1, skuerzel);
+            ps.setString(1, skuerzel.getKuerzel());
             ps.setString(2, modul.getKuerzel());
             rs = ps.executeQuery();
             if(!rs.next()) {
@@ -261,7 +264,7 @@ class implDAO implements DataAccessObject {
             }
 
             ps = con.prepareStatement(richtungTest);
-            ps.setString(1, skuerzel);
+            ps.setString(1, skuerzel.getKuerzel());
             rs = ps.executeQuery();
             if(!rs.next()) {
                 erg = false;
@@ -300,7 +303,7 @@ class implDAO implements DataAccessObject {
     }
 
     @Override
-    public void setTestate(Collection<Praktikumsteilnahme> clctn) {
+    public void updateBescheinigungen(Collection<Praktikumsteilnahme> clctn) {
         PreparedStatement ps = null;
         try {
             for(Praktikumsteilnahme pt : clctn) {
@@ -408,8 +411,8 @@ class implDAO implements DataAccessObject {
         Collection<Praktikumsteilnahme> praktika = new ArrayList<>();
         if(modul != null && !semester.isEmpty()) {
             try {
-                PreparedStatement ps = con.prepareStatement("SELECT * FROM APP.PRAKTIKUMSTEILNAHME PR, APP.STUDENT S " +
-                        "WHERE PR.MATRIKEL = S.MATRIKEL AND PR.MKUERZEL = ? AND PR.SEMESTER = ?");
+                PreparedStatement ps = con.prepareStatement("SELECT * FROM APP.PRAKTIKUMSTEILNAHME PR, APP.STUDENT S, APP.STUDIENRICHTUNG SR " +
+                        "WHERE PR.MATRIKEL = S.MATRIKEL AND S.SKUERZEL = SR.SKUERZEL AND PR.MKUERZEL = ? AND PR.SEMESTER = ?");
                 ps.setString(1, modul.getKuerzel());
                 ps.setString(2, semester);
                 rs = ps.executeQuery();
@@ -417,8 +420,9 @@ class implDAO implements DataAccessObject {
                 while (rs.next()) {
 
                     praktika.add(new ePraktikumsteilnahme(
-                            new eStudent(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5)),
-                            modul, semester, rs.getBoolean(6)));
+                            new eStudent(rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8),
+                                    new eStudienrichtung(rs.getString(10), rs.getString(11))),
+                            modul, semester, rs.getBoolean(4)));
                 }
                 con.commit();
             } catch (SQLException e) {

@@ -1,6 +1,6 @@
 package ws1718.gdb.sis;
 
-import edu.whs.gdb.GUIFactory;
+import edu.whs.dba.GUIFactory;
 /**
  * Projektaufgabe in GDB: Studierenden Informationssystem (SIS).
  * Informationssystem zur Verwaltung von Stammdaten, Studienverlaufsplänen,

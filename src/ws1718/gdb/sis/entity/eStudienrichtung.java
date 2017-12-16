@@ -1,6 +1,6 @@
 package ws1718.gdb.sis.entity;
 
-import edu.whs.gdb.entity.Studienrichtung;
+import edu.whs.dba.entity.Studienrichtung;
 import java.util.Objects;
 
 /**

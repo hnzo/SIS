@@ -5,7 +5,7 @@
  */
 package ws1718.gdb.sis.entity;
 
-import edu.whs.gdb.entity.Modul;
+import edu.whs.dba.entity.Modul;
 import java.util.Objects;
 
 /**

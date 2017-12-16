@@ -5,9 +5,9 @@
  */
 package ws1718.gdb.sis.entity;
 
-import edu.whs.gdb.entity.Modul;
-import edu.whs.gdb.entity.Praktikumsteilnahme;
-import edu.whs.gdb.entity.Student;
+import edu.whs.dba.entity.Modul;
+import edu.whs.dba.entity.Praktikumsteilnahme;
+import edu.whs.dba.entity.Student;
 import java.util.Objects;
 
 /**
@@ -43,13 +43,13 @@ public class ePraktikumsteilnahme implements Praktikumsteilnahme {
     }
 
     @Override
-    public boolean isTestat() {
-        return testat;
+    public boolean isBescheinigt() {
+        return false;
     }
 
     @Override
-    public void setTestat(boolean bln) {
-        this.testat = bln;
+    public void setBescheinigt(boolean b) {
+        this.testat = b;
     }
 
     @Override

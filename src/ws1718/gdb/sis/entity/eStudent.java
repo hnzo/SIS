@@ -5,7 +5,9 @@
  */
 package ws1718.gdb.sis.entity;
 
-import edu.whs.gdb.entity.Student;
+import edu.whs.dba.entity.Student;
+import edu.whs.dba.entity.Studienrichtung;
+
 import java.util.Objects;
 
 /**
@@ -18,9 +20,9 @@ public class eStudent implements Student{
     private String name;
     private String vorname;
     private String adresse;
-    private String studienrichtung;
+    private Studienrichtung studienrichtung;
 
-    public eStudent(String matrikelNr, String name, String vorname, String adresse, String studienrichtung) {
+    public eStudent(String matrikelNr, String name, String vorname, String adresse, Studienrichtung studienrichtung) {
         this.matrikelNr = matrikelNr;
         this.name = name;
         this.vorname = vorname;
@@ -28,14 +30,6 @@ public class eStudent implements Student{
         this.studienrichtung = studienrichtung;
     }
 
-    public eStudent(String matrikelNr) {
-        this.matrikelNr = matrikelNr;
-        this.name = null;
-        this.vorname = null;
-        this.adresse = null;
-        this.studienrichtung = null;
-    }
-    
     @Override
     public String getMatrikel() {
         return matrikelNr;
@@ -57,28 +51,8 @@ public class eStudent implements Student{
     }
 
     @Override
-    public String getStudienrichtungKuerzel() {
-        return studienrichtung;
-    }
-
-    public void setStudienrichtung(String studienrichtung) {
-        this.studienrichtung = studienrichtung;
-    }
-
-    public void setMatrikelNr(String matrikelNr) {
-        this.matrikelNr = matrikelNr;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setVorname(String vorname) {
-        this.vorname = vorname;
-    }
-
-    public void setAdresse(String adresse) {
-        this.adresse = adresse;
+    public Studienrichtung getStudienrichtung() {
+        return this.studienrichtung;
     }
 
     @Override
