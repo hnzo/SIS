@@ -15,10 +15,17 @@ import java.util.Objects;
  * @author hnzo
  */
 public class ePraktikumsteilnahme implements Praktikumsteilnahme {
-    private eStudent student;
-    private eModul modul;
+    private Student student;
+    private Modul modul;
     private String semester;
     private boolean testat;
+
+    public ePraktikumsteilnahme(Student student, Modul modul, String semester, boolean testat) {
+        this.student = student;
+        this.modul = modul;
+        this.semester = semester;
+        this.testat = testat;
+    }
 
     @Override
     public Student getStudent() {

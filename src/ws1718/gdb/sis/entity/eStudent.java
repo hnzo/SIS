@@ -27,6 +27,14 @@ public class eStudent implements Student{
         this.adresse = adresse;
         this.studienrichtung = studienrichtung;
     }
+
+    public eStudent(String matrikelNr) {
+        this.matrikelNr = matrikelNr;
+        this.name = null;
+        this.vorname = null;
+        this.adresse = null;
+        this.studienrichtung = null;
+    }
     
     @Override
     public String getMatrikel() {
