@@ -16,7 +16,7 @@ class SIS {
      */
     public static void main(String[] args) {
         implDAO dao = new implDAO();
-        GUIFactory.createMainFrame("SIS v0.0", dao).setVisible(true);
+        GUIFactory.createMainFrame("SIS v0.8", dao).setVisible(true);
         
     }
     

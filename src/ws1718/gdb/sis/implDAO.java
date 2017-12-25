@@ -6,6 +6,7 @@ import edu.whs.dba.entity.Modul;
 import edu.whs.dba.entity.Praktikumsteilnahme;
 import edu.whs.dba.entity.Student;
 import edu.whs.dba.entity.Studienrichtung;
+import org.jfree.data.general.DefaultPieDataset;
 import ws1718.gdb.sis.entity.eModul;
 import ws1718.gdb.sis.entity.ePraktikumsteilnahme;
 import ws1718.gdb.sis.entity.eStudent;
@@ -15,6 +16,7 @@ import ws1718.gdb.sis.entity.eStudienrichtung;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import javax.swing.JPanel;
 
@@ -234,7 +236,7 @@ class implDAO implements DataAccessObject {
             try {
                 addStudent(matrikelnr, name, vorname, adresse, skuerzel);
             } catch (ApplicationException e) {
-                System.out.println("Student vorhanden");
+                System.out.println("Student bereits vorhanden");
             }
             PreparedStatement ps = con.prepareStatement(modulTest);
             ps.setString(1, skuerzel.getKuerzel());
@@ -273,7 +275,7 @@ class implDAO implements DataAccessObject {
 
             if(erg) {
                 PreparedStatement psInsert = con.prepareStatement(insert);
-                psInsert.setString(1,matrikelnr);
+                psInsert.setString(1, matrikelnr);
                 psInsert.setString(2, modul.getKuerzel());
                 psInsert.setString(3, semester);
                 psInsert.setBoolean(4, false);
@@ -446,9 +448,45 @@ class implDAO implements DataAccessObject {
         return praktika;
     }
 
+    /**
+     *
+     * Para1: Integer für ausgewähltes Diagramm
+     * Para2: Studienrichtung Object
+     * Para3: String-Objekt für das Semesters
+     */
     @Override
     public JPanel getChart(int i, Object o, Object o1) throws ApplicationException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JPanel jp = new JPanel();
+        if(!(o instanceof Studienrichtung))
+            throw new ApplicationException("Es wurde kein Studienrichtung-Onjekt übergeben.");
+        if(!(o1 instanceof String))
+            throw new ApplicationException("Es wurde kein String-Objekt übergeben.");
+
+        switch (i) {
+            case VISUALISIERUNG_ANTEIL_BESCHEIGUNGEN:
+                break;
+            case VISUALISIERUNG_AUFTEILUNG_ANMELDUNGEN:
+                DefaultPieDataset pieDS = new DefaultPieDataset();
+
+                try {
+                    PreparedStatement ps = con.prepareStatement("SELECT MKUERZEL, count(*) AS anzahl FROM app.STUDENT s," +
+                            "app.PRAKTIKUMSTEILNAHME p WHERE p.SEMESTER = 'WS99/00'\n" +
+                            " AND s.SKUERZEL = 'PI' AND p.MATRIKEL = s.MATRIKEL GROUP BY MKUERZEL");
+                    ps.setString(1, (String)o1);
+                    ResultSet rs = ps.executeQuery();
+
+                    while(rs.next()) {
+
+                    }
+                } catch (SQLException e) {
+                    System.err.println("ERROR");
+                }
+
+                break;
+
+        }
+
+        return jp;
     }
 
     @Override
