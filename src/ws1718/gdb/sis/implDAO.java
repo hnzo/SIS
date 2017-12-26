@@ -11,7 +11,6 @@ import ws1718.gdb.sis.entity.ePraktikumsteilnahme;
 import ws1718.gdb.sis.entity.eStudent;
 import ws1718.gdb.sis.entity.eStudienrichtung;
 
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +19,10 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.jdbc.JDBCPieDataset;
 
 /**
@@ -61,7 +64,6 @@ class implDAO implements DataAccessObject {
         ArrayList<String> vierteZeile = new ArrayList<>();
         int[] swsSumme = new int[6];
 
-
         //ERSTE ZEILE IM STUDIENVERLAUFSPLAN
         ersteZeile.add("Studienverlaufsplan\n" + s.toString() + "\t");
         for (int i = 0; i < 6; i++) {
@@ -84,10 +86,10 @@ class implDAO implements DataAccessObject {
 
         try {
             stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT DISTINCT K.LFDNR, K.NAME, K.KKUERZEL\n" +
-                    "FROM APP.KATEGORIE K, APP.MODUL M, APP.STUDIENRICHTUNG S, APP.VERLAUFSPLAN V\n" +
-                    "WHERE K.KKUERZEL = M.KKUERZEL AND M.MKUERZEL = V.MKUERZEL AND V.SKUERZEL = S.SKUERZEL " +
-                    "AND S.SKUERZEL =" + "'" + s.getKuerzel() + "'");
+            rs = stmt.executeQuery("SELECT DISTINCT K.LFDNR, K.NAME, K.KKUERZEL\n"
+                    + "FROM APP.KATEGORIE K, APP.MODUL M, APP.STUDIENRICHTUNG S, APP.VERLAUFSPLAN V\n"
+                    + "WHERE K.KKUERZEL = M.KKUERZEL AND M.MKUERZEL = V.MKUERZEL AND V.SKUERZEL = S.SKUERZEL "
+                    + "AND S.SKUERZEL =" + "'" + s.getKuerzel() + "'");
             while (rs.next()) {
                 kname.add(rs.getString(2));
                 kkuerzel.add(rs.getString(3));
@@ -99,10 +101,10 @@ class implDAO implements DataAccessObject {
                 int stunden = 0;
                 for (int b = 1; b <= 6; b++) {
 
-                    rs = stmt.executeQuery("SELECT DISTINCT M.MKUERZEL, M.VL, M.UB, M.PR, M.CREDITS\n" +
-                            "FROM APP.KATEGORIE K, APP.MODUL M, APP.STUDIENRICHTUNG S, APP.VERLAUFSPLAN V\n" +
-                            "WHERE M.MKUERZEL = V.MKUERZEL AND V.SKUERZEL = S.SKUERZEL AND S.SKUERZEL =" + "'" + s.getKuerzel() + "'" +
-                            "AND M.KKUERZEL =" + "'" + kkuerzel.get(i) + "'" + "AND V.SEM=" + b);
+                    rs = stmt.executeQuery("SELECT DISTINCT M.MKUERZEL, M.VL, M.UB, M.PR, M.CREDITS\n"
+                            + "FROM APP.KATEGORIE K, APP.MODUL M, APP.STUDIENRICHTUNG S, APP.VERLAUFSPLAN V\n"
+                            + "WHERE M.MKUERZEL = V.MKUERZEL AND V.SKUERZEL = S.SKUERZEL AND S.SKUERZEL =" + "'" + s.getKuerzel() + "'"
+                            + "AND M.KKUERZEL =" + "'" + kkuerzel.get(i) + "'" + "AND V.SEM=" + b);
 
                     String info = "";
                     while (rs.next()) {
@@ -125,16 +127,18 @@ class implDAO implements DataAccessObject {
             e.printStackTrace();
             rollback();
         } finally {
-            try{
-                if( rs != null ) {
+            try {
+                if (rs != null) {
                     rs.close();
                 }
-            } catch( SQLException ignore ) {}
-            try{
-                if( stmt!= null ) {
+            } catch (SQLException ignore) {
+            }
+            try {
+                if (stmt != null) {
                     stmt.close();
                 }
-            } catch( SQLException ignore ) {}
+            } catch (SQLException ignore) {
+            }
 
         }
 
@@ -149,18 +153,16 @@ class implDAO implements DataAccessObject {
         vierteZeile.add("" + Summe);
         verlaufsplan.add(vierteZeile);
 
-
         return verlaufsplan;
     }
-
 
     @Override
     public void addStudent(String matrikelNr, String name, String vorname, String adresse, Studienrichtung studienrichtung) throws ApplicationException {
 
         eStudent stud = new eStudent(matrikelNr, name, vorname, adresse, studienrichtung);
         try {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO APP.STUDENT(MATRIKEL, NAME, VORNAME, ADRESSE, SKUERZEL)" +
-                    " VALUES (?, ?, ?, ?, ?)");
+            PreparedStatement ps = con.prepareStatement("INSERT INTO APP.STUDENT(MATRIKEL, NAME, VORNAME, ADRESSE, SKUERZEL)"
+                    + " VALUES (?, ?, ?, ?, ?)");
             ps.setString(1, stud.getMatrikel());
             ps.setString(2, stud.getName());
             ps.setString(3, stud.getVorname());
@@ -176,16 +178,18 @@ class implDAO implements DataAccessObject {
             e.printStackTrace();
             rollback();
         } finally {
-            try{
-                if( rs != null ) {
+            try {
+                if (rs != null) {
                     rs.close();
                 }
-            } catch( SQLException ignore ) {}
-            try{
-                if( stmt!= null ) {
+            } catch (SQLException ignore) {
+            }
+            try {
+                if (stmt != null) {
                     stmt.close();
                 }
-            } catch( SQLException ignore ) {}
+            } catch (SQLException ignore) {
+            }
 
         }
     }
@@ -206,22 +210,23 @@ class implDAO implements DataAccessObject {
             System.err.println("Die Studenten konnten nicht ausgegeben werden.");
             e.printStackTrace();
             rollback();
-        }finally {
-            try{
-                if( rs != null ) {
+        } finally {
+            try {
+                if (rs != null) {
                     rs.close();
                 }
-            } catch( SQLException ignore ) {}
-            try{
-                if( stmt!= null ) {
+            } catch (SQLException ignore) {
+            }
+            try {
+                if (stmt != null) {
                     stmt.close();
                 }
-            } catch( SQLException ignore ) {}
+            } catch (SQLException ignore) {
+            }
 
         }
         return students;
     }
-
 
     @Override
     public boolean enroll(String matrikelnr, String name, String vorname, String adresse, Studienrichtung skuerzel, Modul modul, String semester) throws ApplicationException {
@@ -234,7 +239,7 @@ class implDAO implements DataAccessObject {
 //        String matrikelTest = "SELECT * FROM STUDENT WHERE MATRIKEL = ?";
         String insert = "INSERT INTO APP.PRAKTIKUMSTEILNAHME(MATRIKEL, MKUERZEL, SEMESTER, TESTAT) VALUES (?,?,?,?)";
 
-        try{
+        try {
             try {
                 addStudent(matrikelnr, name, vorname, adresse, skuerzel);
             } catch (ApplicationException e) {
@@ -244,7 +249,7 @@ class implDAO implements DataAccessObject {
             ps.setString(1, skuerzel.getKuerzel());
             ps.setString(2, modul.getKuerzel());
             rs = ps.executeQuery();
-            if(!rs.next()) {
+            if (!rs.next()) {
                 erg = false;
                 throw new ApplicationException("Das übergebene Modul ist nicht Bestandteil der Studienrichtung!");
             }
@@ -252,7 +257,7 @@ class implDAO implements DataAccessObject {
             ps = con.prepareStatement(prTest);
             ps.setString(1, modul.getKuerzel());
             rs = ps.executeQuery();
-            if(!rs.next()) {
+            if (!rs.next()) {
                 erg = false;
                 throw new ApplicationException("Das übergebene Modul sieht kein Praktikum vor.");
             }
@@ -262,7 +267,7 @@ class implDAO implements DataAccessObject {
             ps.setString(2, modul.getKuerzel());
             ps.setString(3, semester);
             rs = ps.executeQuery();
-            if(rs.next()) {
+            if (rs.next()) {
                 erg = false;
                 throw new ApplicationException("Der Teilnehmer ist schon in der Datenbank vorhanden!");
             }
@@ -270,12 +275,12 @@ class implDAO implements DataAccessObject {
             ps = con.prepareStatement(richtungTest);
             ps.setString(1, skuerzel.getKuerzel());
             rs = ps.executeQuery();
-            if(!rs.next()) {
+            if (!rs.next()) {
                 erg = false;
                 throw new ApplicationException("Es wurde keine oder eine nicht erfasste Studienrichtung angegeben!");
             }
 
-            if(erg) {
+            if (erg) {
                 PreparedStatement psInsert = con.prepareStatement(insert);
                 psInsert.setString(1, matrikelnr);
                 psInsert.setString(2, modul.getKuerzel());
@@ -291,16 +296,18 @@ class implDAO implements DataAccessObject {
             e.printStackTrace();
             rollback();
         } finally {
-            try{
-                if( rs != null ) {
+            try {
+                if (rs != null) {
                     rs.close();
                 }
-            } catch( SQLException ignore ) {}
-            try{
-                if( stmt!= null ) {
+            } catch (SQLException ignore) {
+            }
+            try {
+                if (stmt != null) {
                     stmt.close();
                 }
-            } catch( SQLException ignore ) {}
+            } catch (SQLException ignore) {
+            }
         }
 
         return erg;
@@ -310,9 +317,9 @@ class implDAO implements DataAccessObject {
     public void updateBescheinigungen(Collection<Praktikumsteilnahme> clctn) {
         PreparedStatement ps = null;
         try {
-            for(Praktikumsteilnahme pt : clctn) {
-                ps = con.prepareStatement("UPDATE APP.PRAKTIKUMSTEILNAHME SET TESTAT = TRUE " +
-                        "WHERE MATRIKEL = ? AND MKUERZEL = ? AND SEMESTER = ?");
+            for (Praktikumsteilnahme pt : clctn) {
+                ps = con.prepareStatement("UPDATE APP.PRAKTIKUMSTEILNAHME SET TESTAT = TRUE "
+                        + "WHERE MATRIKEL = ? AND MKUERZEL = ? AND SEMESTER = ?");
                 ps.setString(1, pt.getStudent().getMatrikel());
                 ps.setString(2, pt.getModul().getKuerzel());
                 ps.setString(3, pt.getSemester());
@@ -320,27 +327,29 @@ class implDAO implements DataAccessObject {
             }
             con.commit();
 
-
         } catch (SQLException e) {
             System.err.println("Die Testate konnten nicht gesetzt werden.");
             e.printStackTrace();
             rollback();
         } finally {
-            try{
-                if( rs != null ) {
+            try {
+                if (rs != null) {
                     rs.close();
                 }
-            } catch( SQLException ignore ) {}
-            try{
-                if( stmt!= null ) {
+            } catch (SQLException ignore) {
+            }
+            try {
+                if (stmt != null) {
                     stmt.close();
                 }
-            } catch( SQLException ignore ) {}
-            try{
-                if( ps!= null ) {
+            } catch (SQLException ignore) {
+            }
+            try {
+                if (ps != null) {
                     ps.close();
                 }
-            } catch( SQLException ignore ) {}
+            } catch (SQLException ignore) {
+            }
         }
     }
 
@@ -360,16 +369,18 @@ class implDAO implements DataAccessObject {
             ex.printStackTrace();
             rollback();
         } finally {
-            try{
-                if( rs != null ) {
+            try {
+                if (rs != null) {
                     rs.close();
                 }
-            } catch( SQLException ignore ) {}
-            try{
-                if( stmt!= null ) {
+            } catch (SQLException ignore) {
+            }
+            try {
+                if (stmt != null) {
                     stmt.close();
                 }
-            } catch( SQLException ignore ) {}
+            } catch (SQLException ignore) {
+            }
 
         }
 
@@ -413,10 +424,10 @@ class implDAO implements DataAccessObject {
     @Override
     public Collection<Praktikumsteilnahme> getAllPraktikumsteilnahme(Modul modul, String semester) {
         Collection<Praktikumsteilnahme> praktika = new ArrayList<>();
-        if(modul != null && !semester.isEmpty()) {
+        if (modul != null && !semester.isEmpty()) {
             try {
-                PreparedStatement ps = con.prepareStatement("SELECT * FROM APP.PRAKTIKUMSTEILNAHME PR, APP.STUDENT S, APP.STUDIENRICHTUNG SR " +
-                        "WHERE PR.MATRIKEL = S.MATRIKEL AND S.SKUERZEL = SR.SKUERZEL AND PR.MKUERZEL = ? AND PR.SEMESTER = ?");
+                PreparedStatement ps = con.prepareStatement("SELECT * FROM APP.PRAKTIKUMSTEILNAHME PR, APP.STUDENT S, APP.STUDIENRICHTUNG SR "
+                        + "WHERE PR.MATRIKEL = S.MATRIKEL AND S.SKUERZEL = SR.SKUERZEL AND PR.MKUERZEL = ? AND PR.SEMESTER = ?");
                 ps.setString(1, modul.getKuerzel());
                 ps.setString(2, semester);
                 rs = ps.executeQuery();
@@ -434,16 +445,18 @@ class implDAO implements DataAccessObject {
                 e.printStackTrace();
                 rollback();
             } finally {
-                try{
-                    if( rs != null ) {
+                try {
+                    if (rs != null) {
                         rs.close();
                     }
-                } catch( SQLException ignore ) {}
-                try{
-                    if( stmt!= null ) {
+                } catch (SQLException ignore) {
+                }
+                try {
+                    if (stmt != null) {
                         stmt.close();
                     }
-                } catch( SQLException ignore ) {}
+                } catch (SQLException ignore) {
+                }
 
             }
         }
@@ -452,59 +465,88 @@ class implDAO implements DataAccessObject {
 
     /**
      *
-     * Para1: Integer für ausgewähltes Diagramm
-     * Para2: Studienrichtung Object
+     * Para1: Integer für ausgewähltes Diagramm Para2: Studienrichtung Object
      * Para3: String-Objekt für das Semesters
      */
     @Override
     public JPanel getChart(int i, Object o, Object o1) throws ApplicationException {
-        JPanel jp = new JPanel();
         JFreeChart jc = null;
-        if(!(o instanceof Studienrichtung))
-            throw new ApplicationException("Es wurde kein Studienrichtung-Onjekt übergeben.");
-        if(!(o1 instanceof String))
-            throw new ApplicationException("Es wurde kein String-Objekt übergeben.");
 
-        Studienrichtung sr = (Studienrichtung)o;
-        String sem = (String) o1;
-        
         try {
-        switch (i) {
-            case VISUALISIERUNG_ANTEIL_BESCHEIGUNGEN:
-                break;
-            case VISUALISIERUNG_AUFTEILUNG_ANMELDUNGEN:
+            switch (i) {
+                case VISUALISIERUNG_ANTEIL_BESCHEIGUNGEN: {
+                    if (!(o instanceof String)) {
+                        throw new ApplicationException("Es wurde kein String-Objekt übergeben.");
+                    } else if (o1 != null) {
+                        throw new ApplicationException("Das Objekt ist nicht 'null'");
+                    }
+                    String sem = (String) o;
+                    String sqlTestate = "";
 
-                    String sql = "SELECT MKUERZEL, count(*) AS anzahl FROM app.STUDENT s," +
-                            "app.PRAKTIKUMSTEILNAHME p WHERE p.SEMESTER = '" + sem + "'" +
-                            " AND s.SKUERZEL = '"+ sr.getKuerzel() + "' AND p.MATRIKEL = s.MATRIKEL GROUP BY MKUERZEL";
+                    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+                    dataset.addValue(1.0, "Row 1", "Column 1");
+                    dataset.addValue(5.0, "Row 1", "Column 2");
+                    dataset.addValue(3.0, "Row 1", "Column 3");
+                    dataset.addValue(2.0, "Row 2", "Column 1");
+                    dataset.addValue(3.0, "Row 2", "Column 2");
+                    dataset.addValue(2.0, "Row 2", "Column 3");
+                    JFreeChart chart = ChartFactory.createBarChart(
+                            "(" + sem + ")", // chart title
+                            "Praktikumsmodule nach Studienrichtung", // domain axis label
+                            "Teilnehmer mit Bescheinigungen in %", // range axis label
+                            dataset, // data
+                            PlotOrientation.VERTICAL, // orientation
+                            true, // include legend
+                            true, // tooltips?
+                            false // URLs?
+                    );
+                    ChartPanel chartPanel = new ChartPanel(chart, false);
+                }
+                break;
+                case VISUALISIERUNG_AUFTEILUNG_ANMELDUNGEN: {
+                    if (!(o instanceof Studienrichtung)) {
+                        throw new ApplicationException("Es wurde kein Studienrichtung-Onjekt übergeben.");
+                    }
+                    if (!(o1 instanceof String)) {
+                        throw new ApplicationException("Es wurde kein String-Objekt übergeben.");
+                    }
+                    
+                    Studienrichtung sr = (Studienrichtung) o;
+                    String sem = (String) o1;
+                    
+                    String sql = "SELECT MKUERZEL, count(*) AS anzahl FROM app.STUDENT s,"
+                            + "app.PRAKTIKUMSTEILNAHME p WHERE p.SEMESTER = '" + sem + "'"
+                            + " AND s.SKUERZEL = '" + sr.getKuerzel() + "' AND p.MATRIKEL = s.MATRIKEL GROUP BY MKUERZEL";
                     
                     JDBCPieDataset pieDS = new JDBCPieDataset(con, sql);
-                   jc = ChartFactory.createPieChart("" + sr.toString() + " (" + sem + ")", pieDS, true, true, false);
-                    
-                   pieDS.close();
+                    jc = ChartFactory.createPieChart("" + sr.toString() + " (" + sem + ")", pieDS, true, true, false);
+                    ((PiePlot) jc.getPlot()).setLabelGenerator(new StandardPieSectionLabelGenerator("{0}: {1} Anmeldungen"));
+                    pieDS.close();
+                }
                 break;
+            }
+        } catch (SQLException e) {
+            System.err.println("Es konnten keine statistischen Daten der DB entnommen werden.");
+            e.printStackTrace();
+            rollback();
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException ignore) {
+            }
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException ignore) {
+            }
 
         }
-                } catch (SQLException e) {
-                    System.err.println("Es konnten keine statistischen Daten der DB entnommen werden.");
-                    e.printStackTrace();
-                    rollback();
-                } finally {
-                try{
-                    if( rs != null ) {
-                        rs.close();
-                    }
-                } catch( SQLException ignore ) {}
-                try{
-                    if( stmt!= null ) {
-                        stmt.close();
-                    }
-                } catch( SQLException ignore ) {}
-                
-            }
-        
-                ChartPanel cp = new ChartPanel(jc);
-                
+
+        ChartPanel cp = new ChartPanel(jc);
+
         return cp;
     }
 
