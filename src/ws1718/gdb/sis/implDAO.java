@@ -481,26 +481,44 @@ class implDAO implements DataAccessObject {
                         throw new ApplicationException("Das Objekt ist nicht 'null'");
                     }
                     String sem = (String) o;
-                    String sqlTestate = "";
+                    for (Studienrichtung s : getAllStudienrichtung()) {
+                        PreparedStatement ps = con.prepareStatement(""
+                                + "select distinct m.mkuerzel"
+                                + "from verlaufsplan v, modul m, praktikumsteilnahme p"
+                                + "where v.skuerzel = '?'"
+                                + "and p.SEMESTER = '?'"
+                                + "and m.PR > 0"
+                                + "and v.mkuerzel = m.MKUERZEL"
+                                + "and m.MKUERZEL = p.MKUERZEL");
 
-                    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-                    dataset.addValue(1.0, "Row 1", "Column 1");
-                    dataset.addValue(5.0, "Row 1", "Column 2");
-                    dataset.addValue(3.0, "Row 1", "Column 3");
-                    dataset.addValue(2.0, "Row 2", "Column 1");
-                    dataset.addValue(3.0, "Row 2", "Column 2");
-                    dataset.addValue(2.0, "Row 2", "Column 3");
-                    JFreeChart chart = ChartFactory.createBarChart(
-                            "(" + sem + ")", // chart title
-                            "Praktikumsmodule nach Studienrichtung", // domain axis label
-                            "Teilnehmer mit Bescheinigungen in %", // range axis label
-                            dataset, // data
-                            PlotOrientation.VERTICAL, // orientation
-                            true, // include legend
-                            true, // tooltips?
-                            false // URLs?
-                    );
-                    ChartPanel chartPanel = new ChartPanel(chart, false);
+                        ps.setString(1, s.getKuerzel());
+                        ps.setString(2, sem);
+
+                        ResultSet rs = ps.executeQuery();
+
+                        while (rs.next()) {
+                            
+                        }
+
+                        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+                        dataset.addValue(1.0, "Row 1", "Column 1");
+                        dataset.addValue(5.0, "Row 1", "Column 2");
+                        dataset.addValue(3.0, "Row 1", "Column 3");
+                        dataset.addValue(2.0, "Row 2", "Column 1");
+                        dataset.addValue(3.0, "Row 2", "Column 2");
+                        dataset.addValue(2.0, "Row 2", "Column 3");
+                        jc = ChartFactory.createBarChart(
+                                "(" + sem + ")", // chart title
+                                "Praktikumsmodule nach Studienrichtung", // domain axis label
+                                "Teilnehmer mit Bescheinigungen in %", // range axis label
+                                dataset, // data
+                                PlotOrientation.VERTICAL, // orientation
+                                true, // include legend
+                                true, // tooltips?
+                                false // URLs?
+                        );
+                    }
+                    ChartPanel chartPanel = new ChartPanel(jc, false);
                 }
                 break;
                 case VISUALISIERUNG_AUFTEILUNG_ANMELDUNGEN: {
@@ -510,14 +528,14 @@ class implDAO implements DataAccessObject {
                     if (!(o1 instanceof String)) {
                         throw new ApplicationException("Es wurde kein String-Objekt übergeben.");
                     }
-                    
+
                     Studienrichtung sr = (Studienrichtung) o;
                     String sem = (String) o1;
-                    
+
                     String sql = "SELECT MKUERZEL, count(*) AS anzahl FROM app.STUDENT s,"
                             + "app.PRAKTIKUMSTEILNAHME p WHERE p.SEMESTER = '" + sem + "'"
                             + " AND s.SKUERZEL = '" + sr.getKuerzel() + "' AND p.MATRIKEL = s.MATRIKEL GROUP BY MKUERZEL";
-                    
+
                     JDBCPieDataset pieDS = new JDBCPieDataset(con, sql);
                     jc = ChartFactory.createPieChart("" + sr.toString() + " (" + sem + ")", pieDS, true, true, false);
                     ((PiePlot) jc.getPlot()).setLabelGenerator(new StandardPieSectionLabelGenerator("{0}: {1} Anmeldungen"));
