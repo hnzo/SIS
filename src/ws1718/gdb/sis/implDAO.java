@@ -6,7 +6,6 @@ import edu.whs.dba.entity.Modul;
 import edu.whs.dba.entity.Praktikumsteilnahme;
 import edu.whs.dba.entity.Student;
 import edu.whs.dba.entity.Studienrichtung;
-import org.jfree.data.general.DefaultPieDataset;
 import ws1718.gdb.sis.entity.eModul;
 import ws1718.gdb.sis.entity.ePraktikumsteilnahme;
 import ws1718.gdb.sis.entity.eStudent;
@@ -17,7 +16,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -483,7 +481,7 @@ class implDAO implements DataAccessObject {
                     JDBCPieDataset pieDS = new JDBCPieDataset(con, sql);
                    jc = ChartFactory.createPieChart("" + sr.toString() + " (" + sem + ")", pieDS, true, true, false);
                     
-
+                   pieDS.close();
                 break;
 
         }
@@ -502,7 +500,7 @@ class implDAO implements DataAccessObject {
                         stmt.close();
                     }
                 } catch( SQLException ignore ) {}
-
+                
             }
         
                 ChartPanel cp = new ChartPanel(jc);
