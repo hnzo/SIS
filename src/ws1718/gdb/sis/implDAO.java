@@ -16,9 +16,13 @@ import ws1718.gdb.sis.entity.eStudienrichtung;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import javax.swing.JPanel;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.jdbc.JDBCPieDataset;
 
 /**
  * @author hnzo
@@ -28,11 +32,11 @@ class implDAO implements DataAccessObject {
     private Connection con = null;
     private Statement stmt = null;
     private ResultSet rs = null;
-    private final static String conURL = "jdbc:derby:D:/OneDrive/Studium/GDB/WS17-18/gdb-Aufgabe6-Bibliotheken/gdb-praktikum";
+    private final static String CONURL = "jdbc:derby:D:/OneDrive/Studium/GDB/WS17-18/gdb-Aufgabe6-Bibliotheken/gdb-praktikum";
 
     implDAO() {
         try {
-            con = DriverManager.getConnection(conURL);
+            con = DriverManager.getConnection(CONURL);
             con.setAutoCommit(false);
         } catch (SQLException ex) {
             System.out.println("Connection Failed");
@@ -457,36 +461,53 @@ class implDAO implements DataAccessObject {
     @Override
     public JPanel getChart(int i, Object o, Object o1) throws ApplicationException {
         JPanel jp = new JPanel();
+        JFreeChart jc = null;
         if(!(o instanceof Studienrichtung))
             throw new ApplicationException("Es wurde kein Studienrichtung-Onjekt übergeben.");
         if(!(o1 instanceof String))
             throw new ApplicationException("Es wurde kein String-Objekt übergeben.");
 
+        Studienrichtung sr = (Studienrichtung)o;
+        String sem = (String) o1;
+        
+        try {
         switch (i) {
             case VISUALISIERUNG_ANTEIL_BESCHEIGUNGEN:
                 break;
             case VISUALISIERUNG_AUFTEILUNG_ANMELDUNGEN:
-                DefaultPieDataset pieDS = new DefaultPieDataset();
 
-                try {
-                    PreparedStatement ps = con.prepareStatement("SELECT MKUERZEL, count(*) AS anzahl FROM app.STUDENT s," +
-                            "app.PRAKTIKUMSTEILNAHME p WHERE p.SEMESTER = 'WS99/00'\n" +
-                            " AND s.SKUERZEL = 'PI' AND p.MATRIKEL = s.MATRIKEL GROUP BY MKUERZEL");
-                    ps.setString(1, (String)o1);
-                    ResultSet rs = ps.executeQuery();
-
-                    while(rs.next()) {
-
-                    }
-                } catch (SQLException e) {
-                    System.err.println("ERROR");
-                }
+                    String sql = "SELECT MKUERZEL, count(*) AS anzahl FROM app.STUDENT s," +
+                            "app.PRAKTIKUMSTEILNAHME p WHERE p.SEMESTER = '" + sem + "'" +
+                            " AND s.SKUERZEL = '"+ sr.getKuerzel() + "' AND p.MATRIKEL = s.MATRIKEL GROUP BY MKUERZEL";
+                    
+                    JDBCPieDataset pieDS = new JDBCPieDataset(con, sql);
+                   jc = ChartFactory.createPieChart("" + sr.toString() + " (" + sem + ")", pieDS, true, true, false);
+                    
 
                 break;
 
         }
+                } catch (SQLException e) {
+                    System.err.println("Es konnten keine statistischen Daten der DB entnommen werden.");
+                    e.printStackTrace();
+                    rollback();
+                } finally {
+                try{
+                    if( rs != null ) {
+                        rs.close();
+                    }
+                } catch( SQLException ignore ) {}
+                try{
+                    if( stmt!= null ) {
+                        stmt.close();
+                    }
+                } catch( SQLException ignore ) {}
 
-        return jp;
+            }
+        
+                ChartPanel cp = new ChartPanel(jc);
+                
+        return cp;
     }
 
     @Override
