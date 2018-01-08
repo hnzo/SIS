@@ -481,15 +481,16 @@ class implDAO implements DataAccessObject {
                         throw new ApplicationException("Das Objekt ist nicht 'null'");
                     }
                     String sem = (String) o;
+                    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
                     for (Studienrichtung s : getAllStudienrichtung()) {
                         PreparedStatement ps = con.prepareStatement("" +
-                                "select distinct m.mkuerzel " +
-                                "from verlaufsplan v, modul m, praktikumsteilnahme p " +
-                                "where v.skuerzel = '?' " +
-                                "and p.SEMESTER = '?' " +
-                                "and m.PR > 0 " +
-                                "and v.mkuerzel = m.MKUERZEL " +
-                                "and m.MKUERZEL = p.MKUERZEL");
+                                "SELECT DISTINCT m.mkuerzel " +
+                                "FROM verlaufsplan v, modul m, praktikumsteilnahme p " +
+                                "WHERE v.skuerzel = '?' " +
+                                "AND p.SEMESTER = '?' " +
+                                "AND m.PR > 0 " +
+                                "AND v.mkuerzel = m.MKUERZEL " +
+                                "AND m.MKUERZEL = p.MKUERZEL");
 
                         ps.setString(1, s.getKuerzel());
                         ps.setString(2, sem);
@@ -497,16 +498,33 @@ class implDAO implements DataAccessObject {
                         ResultSet rs = ps.executeQuery();
 
                         while (rs.next()) {
-                            
-                        }
+                            int anmeldungen = rs.getInt("anzahl");
+                            String modul = rs.getString("MKUERZEL");
+                            PreparedStatement ps2 = con.prepareStatement("SELECT m.mkuerzel, count(*) AS granted "
+                                    + "FROM modul m, praktikumsteilnahme p, student s "
+                                    + "WHERE p.mkuerzel = m.mkuerzel "
+                                    + "AND p.matrikel = s.matrikel "
+                                    + "AND testat = TRUE "
+                                    + "AND p.mkuerzel = ? "
+                                    + "AND p.semester = ? "
+                                    + "AND s.skuerzel = ?"
+                                    + " GROUP BY m.mkuerzel");
+                            ps2.setString(1, modul);
+                            ps2.setString(2, sem);
+                            ps2.setString(3, s.getKuerzel());
 
-                        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-                        dataset.addValue(1.0, "Row 1", "Column 1");
-                        dataset.addValue(5.0, "Row 1", "Column 2");
-                        dataset.addValue(3.0, "Row 1", "Column 3");
-                        dataset.addValue(2.0, "Row 2", "Column 1");
-                        dataset.addValue(3.0, "Row 2", "Column 2");
-                        dataset.addValue(2.0, "Row 2", "Column 3");
+                            ResultSet rs2 = ps2.executeQuery();
+                            while (rs2.next()) {
+                                int granted = rs2.getInt("granted");
+
+                                double gesamt = (granted == 0) ? 0 : ((double) granted / (double) anmeldungen) * 100;
+                                dataset.addValue(gesamt, modul, s.getKuerzel());
+                            }
+                        }
+                        rs.close();
+
+
+                    }
                         jc = ChartFactory.createBarChart(
                                 "(" + sem + ")", // chart title
                                 "Praktikumsmodule nach Studienrichtung", // domain axis label
@@ -517,8 +535,8 @@ class implDAO implements DataAccessObject {
                                 true, // tooltips?
                                 false // URLs?
                         );
-                    }
-                    ChartPanel chartPanel = new ChartPanel(jc, false);
+
+                    con.commit();
                 }
                 break;
                 case VISUALISIERUNG_AUFTEILUNG_ANMELDUNGEN: {
@@ -542,6 +560,128 @@ class implDAO implements DataAccessObject {
                     pieDS.close();
                 }
                 break;
+                case VISUALISIERUNG_ENTWICKLUNG_ANMELDUNGEN: {
+                    if (!(o instanceof Modul)) {
+                        throw new ApplicationException("Kein Objekt vom Typ Modul!");
+                    } else if (o1 != null) {
+                        throw new ApplicationException("Objekt muss null sein!");
+                    }
+
+                    Modul modul = (Modul) o;
+                    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+                    String sqlAnmeldungen = "select semester, count(*) as anmeldungen"
+                            + " from praktikumsteilnahme p, student s"
+                            + " where s.matrikel = p.matrikel"
+                            + " and p.mkuerzel = ?"
+                            + " group by semester";
+
+                    PreparedStatement psAnmeldung = this.con.prepareStatement(sqlAnmeldungen);
+                    psAnmeldung.setString(1, modul.getKuerzel());
+                    ResultSet rsA = psAnmeldung.executeQuery();
+
+                    while (rsA.next()) {
+                        dataset.addValue(rsA.getInt("anmeldungen"),
+                                "Anmeldungen", rsA.getString("semester"));
+
+                        dataset.addValue(0, "Testatvergaben",
+                                rsA.getString("semester"));
+                    }
+                    rsA.close();
+
+                    PreparedStatement psTestate = this.con.prepareStatement("select semester, count(*) as bestanden"
+                            + " from praktikumsteilnahme p, student s"
+                            + " where s.matrikel = p.matrikel"
+                            + " and p.mkuerzel = ?"
+                            + " and p.testat = true"
+                            + " group by semester");
+                    psTestate.setString(1, modul.getKuerzel());
+                    ResultSet rsT = psTestate.executeQuery();
+
+                    while (rsT.next()) {
+                        dataset.addValue(rsT.getInt("bestanden"), "Testatvergaben",
+                                rsT.getString("semester"));
+                    }
+                    rsT.close();
+                    jc = ChartFactory.createLineChart(modul.getName()
+                                    + " (" + modul.getKuerzel() + ")",
+                            "Semester", "Studierende", dataset,
+                            PlotOrientation.VERTICAL,
+                            true, true, false);
+                    con.commit();
+
+
+                }
+                break;
+                case VISUALISIERUNG_ANMELDUNGEN_BESCHEINIGUNGEN: {
+                    if (!(o instanceof Studienrichtung)) {
+                        throw new ApplicationException("Kein Objekt vom Typ Studienrichtung!");
+                    } else if (!(o1 instanceof String)) {
+                        throw new ApplicationException("Bitte ein String Objekt wählen!");
+                    }
+
+                    Studienrichtung stR = (Studienrichtung) o;
+                    String sem = (String) o1;
+                    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+                    String teilnahme = "select p.MKUERZEL, count(*) as anmeldungen"
+                            + " from praktikumsteilnahme p, modul m, student s"
+                            + " where s.matrikel = p.matrikel"
+                            + " and p.SEMESTER = ?"
+                            + " and m.PR > 0"
+                            + " and s.SKUERZEL = ?"
+                            + " and m.MKUERZEL = p.MKUERZEL"
+                            + " group by p.MKUERZEL";
+                    PreparedStatement psTeilnahme = this.con.prepareStatement(teilnahme);
+                    psTeilnahme.setString(1, sem);
+                    psTeilnahme.setString(2, stR.getKuerzel());
+                    ResultSet rsTeilnahme = psTeilnahme.executeQuery();
+
+                    while (rsTeilnahme.next()) {
+
+                        String modul = rsTeilnahme.getString("mkuerzel");
+                        int anzahl = rsTeilnahme.getInt("anmeldungen");
+
+                        dataset.addValue(anzahl, "Anmeldungen", modul);
+
+                        PreparedStatement psTestate = this.con.prepareStatement("select p.MKUERZEL, count(*) as bestanden"
+                                + " from praktikumsteilnahme p, student s"
+                                + " where s.matrikel = p.matrikel"
+                                + " and p.SEMESTER = ?"
+                                + " and s.SKUERZEL = ?"
+                                + " and p.MKUERZEL = ?"
+                                + " and p.testat = true"
+                                + " group by p.MKUERZEL");
+
+                        psTestate.setString(1, sem);
+                        psTestate.setString(2, stR.getKuerzel());
+                        psTestate.setString(3, modul);
+                        ResultSet rsTestate = psTestate.executeQuery();
+
+                        while (rsTestate.next()) {
+                            int bestanden = rsTestate.getInt("bestanden");
+                            dataset.addValue(bestanden, "Testatvergaben", modul);
+                        }
+                        rsTestate.close();
+
+                    }
+                    rsTeilnahme.close();
+
+                    jc = ChartFactory.createBarChart(stR.getName()
+                                    + " " + stR.getKuerzel() + " - " + sem,
+                            "Module",
+                            "Studierende",
+                            dataset,
+                            PlotOrientation.VERTICAL,
+                            true,
+                            true,
+                            false);
+                    con.commit();
+                }
+                break;
+                default: {
+                    throw new ApplicationException("Chart Ansicht nicht vorhanden");
+                }
             }
         } catch (SQLException e) {
             System.err.println("Es konnten keine statistischen Daten der DB entnommen werden.");
