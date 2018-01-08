@@ -482,14 +482,14 @@ class implDAO implements DataAccessObject {
                     }
                     String sem = (String) o;
                     for (Studienrichtung s : getAllStudienrichtung()) {
-                        PreparedStatement ps = con.prepareStatement(""
-                                + "select distinct m.mkuerzel"
-                                + "from verlaufsplan v, modul m, praktikumsteilnahme p"
-                                + "where v.skuerzel = '?'"
-                                + "and p.SEMESTER = '?'"
-                                + "and m.PR > 0"
-                                + "and v.mkuerzel = m.MKUERZEL"
-                                + "and m.MKUERZEL = p.MKUERZEL");
+                        PreparedStatement ps = con.prepareStatement("" +
+                                "select distinct m.mkuerzel " +
+                                "from verlaufsplan v, modul m, praktikumsteilnahme p " +
+                                "where v.skuerzel = '?' " +
+                                "and p.SEMESTER = '?' " +
+                                "and m.PR > 0 " +
+                                "and v.mkuerzel = m.MKUERZEL " +
+                                "and m.MKUERZEL = p.MKUERZEL");
 
                         ps.setString(1, s.getKuerzel());
                         ps.setString(2, sem);
@@ -563,9 +563,9 @@ class implDAO implements DataAccessObject {
 
         }
 
-        ChartPanel cp = new ChartPanel(jc);
 
-        return cp;
+
+        return new ChartPanel(jc);
     }
 
     @Override
